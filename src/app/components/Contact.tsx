@@ -10,13 +10,13 @@ const socialLinks = [
   {
     name: 'GitHub',
     icon: Github,
-    href: 'https://github.com',
+    href: '#', // 🔁 Replace with real URL so they are easy to find later
     color: 'hover:text-gray-300',
   },
   {
     name: 'LinkedIn',
     icon: Linkedin,
-    href: 'https://linkedin.com',
+    href: '#', // 🔁 Replace with real URL so they are easy to find later
     color: 'hover:text-blue-400',
   },
   {
@@ -60,15 +60,39 @@ export function Contact() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const formspreeEndpoint =
+        'https://formspree.io/f/YOUR_FORM_ID'; // TODO: Replace YOUR_FORM_ID after signing up at formspree.io
 
-    toast.success('Message sent successfully!', {
-      description: "I'll get back to you as soon as possible.",
-    });
+      const response = await fetch(formspreeEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+        }),
+      });
 
-    setFormData({ name: '', email: '', message: '' });
-    setIsSubmitting(false);
+      if (!response.ok) {
+        throw new Error('Form submission failed');
+      }
+
+      toast.success('Message sent successfully!', {
+        description: "I'll get back to you as soon as possible.",
+      });
+
+      setFormData({ name: '', email: '', message: '' });
+    } catch {
+      toast.error('Message failed to send.', {
+        description:
+          'Please email Ramon directly at ramon.bonina.320401@gmail.com.',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (

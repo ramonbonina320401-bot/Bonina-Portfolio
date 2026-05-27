@@ -1,5 +1,6 @@
+import type { ReactNode } from 'react';
 import { motion } from 'motion/react';
-import { ExternalLink, Github } from 'lucide-react';
+import { Code2, ExternalLink, Gamepad2, Github } from 'lucide-react';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { ImageWithFallback } from './figma/ImageWithFallback';
@@ -52,6 +53,156 @@ const projects = [
   },
 ];
 
+type Project = (typeof projects)[number];
+
+type Category = {
+  id: string;
+  label: string;
+  icon: ReactNode;
+  color: string;
+  borderColor: string;
+  badgeColor: string;
+  projects: Project[];
+};
+
+function hexToRgb(hex: string) {
+  const normalized = hex.replace('#', '').trim();
+  if (normalized.length !== 6) return null;
+  const num = Number.parseInt(normalized, 16);
+  // eslint-disable-next-line no-bitwise
+  const r = (num >> 16) & 255;
+  // eslint-disable-next-line no-bitwise
+  const g = (num >> 8) & 255;
+  // eslint-disable-next-line no-bitwise
+  const b = num & 255;
+  return { r, g, b };
+}
+
+function rgba(hex: string, alpha: number) {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return `rgba(255,255,255,${alpha})`;
+  return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+}
+
+const categories: Category[] = [
+  {
+    id: 'software',
+    label: 'Software Development',
+    icon: <Code2 className="w-4 h-4" />,
+    color: '#2563EB',
+    borderColor: '#2563EB',
+    badgeColor: '#2563EB',
+    projects: [projects[0], projects[1], projects[2]],
+  },
+  {
+    id: 'game',
+    label: 'Game Development',
+    icon: <Gamepad2 className="w-4 h-4" />,
+    color: '#7C3AED',
+    borderColor: '#7C3AED',
+    badgeColor: '#7C3AED',
+    projects: [projects[3]],
+  },
+];
+
+function ProjectCard({
+  project,
+  badgeColor,
+  index,
+}: {
+  project: Project;
+  badgeColor: string;
+  index: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.2 }}
+      className="group relative h-full"
+    >
+      <div className="relative rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm overflow-hidden hover:border-white/20 transition-all duration-500 glass-card h-full flex flex-col">
+        {/* Project image with browser mockup */}
+        <div className="relative p-4">
+          <BrowserMockup url={project.url}>
+            <div className="relative h-64 overflow-hidden">
+              <ImageWithFallback
+                src={project.image}
+                alt={project.title}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+            </div>
+          </BrowserMockup>
+
+          {/* Featured badge */}
+          {project.featured && (
+            <div className="absolute top-8 right-8 z-10">
+              <Badge className="bg-gradient-to-r from-blue-600 to-violet-600 text-white border-0">
+                Featured
+              </Badge>
+            </div>
+          )}
+        </div>
+
+        {/* Project info */}
+        <div className="p-6 space-y-4 flex flex-col flex-1">
+          <h3 className="text-2xl font-bold text-white group-hover:text-blue-400 transition-colors">
+            {project.title}
+          </h3>
+
+          <p className="text-gray-400 leading-relaxed">{project.description}</p>
+
+          {/* Tech stack */}
+          <div className="flex flex-wrap gap-2">
+            {project.technologies.map((tech) => (
+              <Badge
+                key={tech}
+                variant="outline"
+                className="bg-white/5 border text-gray-200/90 hover:brightness-110"
+                style={{
+                  borderColor: rgba(badgeColor, 0.4),
+                  backgroundColor: rgba(badgeColor, 0.12),
+                  color: rgba(badgeColor, 0.95),
+                }}
+              >
+                {tech}
+              </Badge>
+            ))}
+          </div>
+
+          {/* Links */}
+          <div className="flex gap-3 pt-2 mt-auto">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 border-white/20 bg-white/5 hover:bg-white/10 text-white rounded-xl"
+              onClick={() => window.open(project.github, '_blank')}
+            >
+              <Github className="w-4 h-4 mr-2" />
+              Code
+            </Button>
+            <Button
+              size="sm"
+              className="flex-1 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white rounded-xl"
+              onClick={() => window.open(project.demo, '_blank')}
+            >
+              <ExternalLink className="w-4 h-4 mr-2" />
+              Live Demo
+            </Button>
+          </div>
+        </div>
+
+        {/* Hover glow effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 to-violet-500/0 group-hover:from-blue-500/10 group-hover:to-violet-500/10 transition-all duration-500 pointer-events-none -z-10" />
+      </div>
+
+      {/* Card shadow glow */}
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-violet-500/20 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-20 transform scale-95" />
+    </motion.div>
+  );
+}
+
 export function Projects() {
   return (
     <section id="projects" className="relative py-32 px-6">
@@ -66,7 +217,7 @@ export function Projects() {
         >
           <h2 className="text-5xl font-bold mb-4">
             <span className="bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">
-              Featured Projects
+              My Projects
             </span>
           </h2>
           <p className="text-gray-400 text-lg">
@@ -74,94 +225,59 @@ export function Projects() {
           </p>
         </motion.div>
 
-        {/* Projects grid */}
-        <div className="grid md:grid-cols-2 gap-8">
-          {projects.map((project, index) => (
-            <motion.div
-              key={project.title}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.2 }}
-              className="group relative"
-            >
-              <div className="relative rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm overflow-hidden hover:border-white/20 transition-all duration-500 glass-card">
-                {/* Project image with browser mockup */}
-                <div className="relative p-4">
-                  <BrowserMockup url={project.url}>
-                    <div className="relative h-64 overflow-hidden">
-                      <ImageWithFallback
-                        src={project.image}
-                        alt={project.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-                    </div>
-                  </BrowserMockup>
-
-                  {/* Featured badge */}
-                  {project.featured && (
-                    <div className="absolute top-8 right-8 z-10">
-                      <Badge className="bg-gradient-to-r from-blue-600 to-violet-600 text-white border-0">
-                        Featured
-                      </Badge>
-                    </div>
-                  )}
-                </div>
-
-                {/* Project info */}
-                <div className="p-6 space-y-4">
-                  <h3 className="text-2xl font-bold text-white group-hover:text-blue-400 transition-colors">
-                    {project.title}
-                  </h3>
-
-                  <p className="text-gray-400 leading-relaxed">
-                    {project.description}
-                  </p>
-
-                  {/* Tech stack */}
-                  <div className="flex flex-wrap gap-2">
-                    {project.technologies.map((tech) => (
-                      <Badge
-                        key={tech}
-                        variant="outline"
-                        className="border-white/20 bg-white/5 text-gray-300 hover:bg-white/10"
-                      >
-                        {tech}
-                      </Badge>
-                    ))}
-                  </div>
-
-                  {/* Links */}
-                  <div className="flex gap-3 pt-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 border-white/20 bg-white/5 hover:bg-white/10 text-white rounded-xl"
-                      onClick={() => window.open(project.github, '_blank')}
-                    >
-                      <Github className="w-4 h-4 mr-2" />
-                      Code
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="flex-1 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white rounded-xl"
-                      onClick={() => window.open(project.demo, '_blank')}
-                    >
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      Live Demo
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Hover glow effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 to-violet-500/0 group-hover:from-blue-500/10 group-hover:to-violet-500/10 transition-all duration-500 pointer-events-none -z-10" />
+        {categories.map((category) => (
+          <div key={category.id} className="space-y-8 mb-16 last:mb-0">
+            {/* Category header */}
+            <div className="flex items-center gap-4">
+              <div
+                className="inline-flex items-center gap-2 rounded-full px-4 py-2 border text-sm font-medium"
+                style={{
+                  backgroundColor: rgba(category.color, 0.12),
+                  borderColor: rgba(category.borderColor, 0.28),
+                }}
+              >
+                <span style={{ color: rgba(category.color, 1) }}>
+                  {category.icon}
+                </span>
+                {category.label}
               </div>
 
-              {/* Card shadow glow */}
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-violet-500/20 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-20 transform scale-95" />
-            </motion.div>
-          ))}
-        </div>
+              <Badge
+                variant="outline"
+                className="shrink-0 bg-white/5"
+                style={{
+                  borderColor: rgba(category.borderColor, 0.35),
+                  backgroundColor: rgba(category.badgeColor, 0.12),
+                  color: rgba(category.badgeColor, 0.95),
+                }}
+              >
+                {category.projects.length} projects
+              </Badge>
+
+              <div
+                className="flex-1 h-px"
+                style={{
+                  backgroundImage: `linear-gradient(to right, transparent, ${rgba(
+                    category.color,
+                    0.4,
+                  )}, transparent)`,
+                }}
+              />
+            </div>
+
+            {/* Projects grid */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {category.projects.map((project, index) => (
+                <ProjectCard
+                  key={project.title}
+                  project={project}
+                  badgeColor={category.badgeColor}
+                  index={index}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
 
         {/* View more */}
         <motion.div

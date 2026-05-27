@@ -60,13 +60,20 @@ export function Navigation() {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <motion.div
+            <motion.button
+              type="button"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-xl font-bold bg-gradient-to-r from-[#2563EB] to-[#F97316] bg-clip-text text-transparent"
+              onClick={() => scrollToSection('#home')}
+              className="flex items-center gap-3 cursor-pointer"
             >
-              Portfolio
-            </motion.div>
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-r from-[#2563EB] to-[#F97316] flex items-center justify-center">
+                <span className="text-white font-extrabold text-base">RB</span>
+              </div>
+              <span className="hidden sm:block text-xl font-bold bg-gradient-to-r from-[#2563EB] to-[#F97316] bg-clip-text text-transparent">
+                Ramon Bonina
+              </span>
+            </motion.button>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-1">
